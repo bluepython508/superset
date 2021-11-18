@@ -29,6 +29,7 @@ import {
 } from 'src/utils/localStorageHelpers';
 import ConnectedExploreChartHeader from './ExploreChartHeader';
 import { DataTablesPane } from './DataTablesPane';
+import InlineDocumentation from './InlineDocumentation';
 import { buildV1ChartDataPayload } from '../exploreUtils';
 
 const propTypes = {
@@ -249,9 +250,12 @@ const ExploreChartPanel = props => {
     () => (
       <div className="panel-body" ref={chartPanelRef}>
         {renderChart()}
+        {!!props.errorMessage && (
+          <InlineDocumentation vizType={props.vizType} />
+        )}
       </div>
     ),
-    [chartPanelRef, renderChart],
+    [chartPanelRef, renderChart, props.errorMessage, props.vizType],
   );
 
   const standaloneChartBody = useMemo(
