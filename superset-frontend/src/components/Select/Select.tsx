@@ -27,6 +27,7 @@ import React, {
   useState,
   useRef,
   useCallback,
+  useContext,
 } from 'react';
 import { styled, t } from '@superset-ui/core';
 import AntdSelect, {
@@ -40,6 +41,7 @@ import { isEqual } from 'lodash';
 import { Spin } from 'antd';
 import Icons from 'src/components/Icons';
 import { getClientErrorObject } from 'src/utils/getClientErrorObject';
+import HasFirstError from 'src/explore/components/HasFirstErrorContext';
 import { hasOption } from './utils';
 
 const { Option } = AntdSelect;
@@ -170,6 +172,11 @@ const StyledSelect = styled(AntdSelect)`
   ${({ theme }) => `
     && .ant-select-selector {
       border-radius: ${theme.gridUnit}px;
+      ${
+        useContext(HasFirstError)
+          ? `border: 1px solid ${theme.colors.primary.base};`
+          : ''
+      }
     }
 
     // Open the dropdown when clicking on the suffix

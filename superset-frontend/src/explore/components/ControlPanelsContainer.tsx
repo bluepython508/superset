@@ -54,6 +54,7 @@ import { ChartState } from 'src/explore/types';
 
 import ControlRow from './ControlRow';
 import Control from './Control';
+import HasFirstError from './HasFirstErrorContext';
 
 export type ControlPanelsContainerProps = {
   actions: ExploreActions;
@@ -311,13 +312,18 @@ export class ControlPanelsContainer extends React.Component<
           // label is only used in tooltip id (should probably call this prop `id`)
           <InfoTooltipWithTrigger label={sectionId} tooltip={description} />
         )}
-        {hasErrors && (
-          <InfoTooltipWithTrigger
-            label="validation-errors"
-            bsStyle="danger"
-            tooltip="This section contains validation errors"
-          />
-        )}
+        <HasFirstError.Consumer>
+          {hasFirstError =>
+            hasErrors &&
+            !hasFirstError && (
+              <InfoTooltipWithTrigger
+                label="validation-errors"
+                bsStyle="danger"
+                tooltip="This section contains validation errors"
+              />
+            )
+          }
+        </HasFirstError.Consumer>
       </span>
     );
 

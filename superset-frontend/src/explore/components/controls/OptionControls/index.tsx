@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { styled, t, useTheme } from '@superset-ui/core';
 import { InfoTooltipWithTrigger } from '@superset-ui/chart-controls';
@@ -25,6 +25,7 @@ import Icons from 'src/components/Icons';
 import { savedMetricType } from 'src/explore/components/controls/MetricControl/types';
 import AdhocMetric from 'src/explore/components/controls/MetricControl/AdhocMetric';
 import { StyledMetricOption } from '../../optionRenderers';
+import HasFirstError from '../../HasFirstErrorContext';
 
 export const DragContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.gridUnit}px;
@@ -100,7 +101,11 @@ export const HeaderContainer = styled.div`
 
 export const LabelsContainer = styled.div`
   padding: ${({ theme }) => theme.gridUnit}px;
-  border: solid 1px ${({ theme }) => theme.colors.grayscale.light2};
+  border: solid 1px
+    ${({ theme }) =>
+      useContext(HasFirstError)
+        ? theme.colors.primary.base
+        : theme.colors.grayscale.light2};
   border-radius: ${({ theme }) => theme.gridUnit}px;
 `;
 

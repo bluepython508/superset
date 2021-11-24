@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import ButtonGroup from 'src/components/ButtonGroup';
 import { t, useTheme } from '@superset-ui/core';
 
 import { Tooltip } from 'src/components/Tooltip';
 import Button from 'src/components/Button';
+import HasFirstError from './HasFirstErrorContext';
 
 const propTypes = {
   canAdd: PropTypes.bool.isRequired,
@@ -48,6 +49,7 @@ export default function QueryAndSaveBtns({
   chartIsStale,
   errorMessage,
 }) {
+  const hasFirstError = useContext(HasFirstError);
   let qryButtonStyle = 'tertiary';
   if (errorMessage) {
     qryButtonStyle = 'danger';
@@ -112,7 +114,7 @@ export default function QueryAndSaveBtns({
           <i className="fa fa-plus-circle" /> {t('Save')}
         </Button>
       </ButtonGroup>
-      {errorMessage && (
+      {errorMessage && !hasFirstError && (
         <span className="errMsg">
           {' '}
           <Tooltip

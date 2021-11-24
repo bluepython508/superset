@@ -23,6 +23,7 @@ import { InfoTooltipWithTrigger } from '@superset-ui/chart-controls';
 import { Tooltip } from 'src/components/Tooltip';
 import { FormLabel } from 'src/components/Form';
 import Icons from 'src/components/Icons';
+import HasFirstError from './HasFirstErrorContext';
 
 const propTypes = {
   name: PropTypes.string,
@@ -48,7 +49,7 @@ const defaultProps = {
 
 class ControlHeader extends React.Component {
   renderOptionalIcons() {
-    if (this.props.hovered) {
+    if (this.props.hovered || this.context) {
       return (
         <span
           css={theme => css`
@@ -67,6 +68,7 @@ class ControlHeader extends React.Component {
                 tooltip={this.props.description}
                 placement="top"
                 onClick={this.props.tooltipOnClick}
+                bsStyle={this.context ? 'primary' : undefined}
               />{' '}
             </span>
           )}
@@ -91,7 +93,9 @@ class ControlHeader extends React.Component {
       return null;
     }
     const labelClass =
-      this.props.validationErrors.length > 0 ? 'text-danger' : '';
+      this.props.validationErrors.length > 0 && !this.context
+        ? 'text-danger'
+        : '';
 
     const { theme } = this.props;
 
@@ -142,7 +146,7 @@ class ControlHeader extends React.Component {
                 </Tooltip>{' '}
               </span>
             )}
-            {this.props.validationErrors.length > 0 && (
+            {this.props.validationErrors.length > 0 && !this.context && (
               <span>
                 <Tooltip
                   id="error-tooltip"
@@ -170,5 +174,6 @@ class ControlHeader extends React.Component {
 
 ControlHeader.propTypes = propTypes;
 ControlHeader.defaultProps = defaultProps;
+ControlHeader.contextType = HasFirstError;
 
 export default withTheme(ControlHeader);

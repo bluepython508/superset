@@ -25,6 +25,7 @@ import { isFeatureEnabled, FeatureFlag } from 'src/featureFlags';
 import { PLACEHOLDER_DATASOURCE } from 'src/dashboard/constants';
 import Button from 'src/components/Button';
 import Loading from 'src/components/Loading';
+import HasFirstError from 'src/explore/components/HasFirstErrorContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ChartRenderer from './ChartRenderer';
 import { ChartErrorMessage } from './ChartErrorMessage';
@@ -247,11 +248,15 @@ class Chart extends React.PureComponent {
 
     if (errorMessage) {
       return (
-        <Alert
-          data-test="alert-warning"
-          message={errorMessage}
-          type="warning"
-        />
+        <HasFirstError.Consumer>
+          {hasFirstError => (
+            <Alert
+              data-test="alert-warning"
+              message={errorMessage}
+              type={hasFirstError ? 'info' : 'warning'}
+            />
+          )}
+        </HasFirstError.Consumer>
       );
     }
 

@@ -55,6 +55,7 @@ import {
   LOG_ACTIONS_MOUNT_EXPLORER,
   LOG_ACTIONS_CHANGE_EXPLORE_CONTROLS,
 } from '../../logger/LogUtils';
+import HasFirstError from './HasFirstErrorContext';
 
 const propTypes = {
   ...ExploreChartPanel.propTypes,
@@ -171,6 +172,14 @@ function ExploreViewContainer(props) {
     props.controls,
   );
   const windowSize = useWindowSize();
+
+  const hasError = Object.values(props.controls).some(
+    control => (control.validationErrors ?? []).length > 0,
+  );
+  const [hasHadNoError, setHasHadNoError] = useState(false);
+  if (!hasError && !hasHadNoError) {
+    setHasHadNoError(true);
+  }
 
   const [showingModal, setShowingModal] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -448,140 +457,142 @@ function ExploreViewContainer(props) {
   }
 
   return (
-    <Styles id="explore-container" height={height}>
-      <Global
-        styles={css`
-          .navbar {
-            margin-bottom: 0;
-          }
-          body {
-            height: 100vh;
-            max-height: 100vh;
-            overflow: hidden;
-          }
-          #app-menu,
-          #app {
-            flex: 1 1 auto;
-          }
-          #app {
-            flex-basis: 100%;
-            overflow: hidden;
-            height: 100%;
-          }
-          #app-menu {
-            flex-shrink: 0;
-          }
-        `}
-      />
-      {showingModal && (
-        <SaveModal
-          onHide={toggleModal}
-          actions={props.actions}
-          form_data={props.form_data}
-          sliceName={props.sliceName}
-          dashboardId={props.dashboardId}
+    <HasFirstError.Provider value={!hasHadNoError}>
+      <Styles id="explore-container" height={height}>
+        <Global
+          styles={css`
+            .navbar {
+              margin-bottom: 0;
+            }
+            body {
+              height: 100vh;
+              max-height: 100vh;
+              overflow: hidden;
+            }
+            #app-menu,
+            #app {
+              flex: 1 1 auto;
+            }
+            #app {
+              flex-basis: 100%;
+              overflow: hidden;
+              height: 100%;
+            }
+            #app-menu {
+              flex-shrink: 0;
+            }
+          `}
         />
-      )}
-      <Resizable
-        onResizeStop={(evt, direction, ref, d) =>
-          setSidebarWidths(storageKeys.dataSourceWidth, d)
-        }
-        defaultSize={{
-          width: getSidebarWidths(storageKeys.dataSourceWidth),
-          height: '100%',
-        }}
-        minWidth={defaultSidebarsWidth[storageKeys.dataSourceWidth]}
-        maxWidth="33%"
-        enable={{ right: true }}
-        className={
-          isCollapsed ? 'no-show' : 'explore-column data-source-selection'
-        }
-      >
-        <div className="title-container">
-          <span className="horizont al-text">{t('Dataset')}</span>
-          <span
-            role="button"
-            tabIndex={0}
-            className="action-button"
-            onClick={toggleCollapse}
-          >
-            <Icons.Expand
-              className="collapse-icon"
-              iconColor={theme.colors.primary.base}
-              iconSize="l"
-            />
-          </span>
-        </div>
-        <DataSourcePanel
-          datasource={props.datasource}
-          controls={props.controls}
-          actions={props.actions}
-        />
-      </Resizable>
-      {isCollapsed ? (
-        <div
-          className="sidebar"
-          onClick={toggleCollapse}
-          data-test="open-datasource-tab"
-          role="button"
-          tabIndex={0}
+        {showingModal && (
+          <SaveModal
+            onHide={toggleModal}
+            actions={props.actions}
+            form_data={props.form_data}
+            sliceName={props.sliceName}
+            dashboardId={props.dashboardId}
+          />
+        )}
+        <Resizable
+          onResizeStop={(evt, direction, ref, d) =>
+            setSidebarWidths(storageKeys.dataSourceWidth, d)
+          }
+          defaultSize={{
+            width: getSidebarWidths(storageKeys.dataSourceWidth),
+            height: '100%',
+          }}
+          minWidth={defaultSidebarsWidth[storageKeys.dataSourceWidth]}
+          maxWidth="33%"
+          enable={{ right: true }}
+          className={
+            isCollapsed ? 'no-show' : 'explore-column data-source-selection'
+          }
         >
-          <span role="button" tabIndex={0} className="action-button">
-            <Tooltip title={t('Open Datasource tab')}>
-              <Icons.Collapse
+          <div className="title-container">
+            <span className="horizont al-text">{t('Dataset')}</span>
+            <span
+              role="button"
+              tabIndex={0}
+              className="action-button"
+              onClick={toggleCollapse}
+            >
+              <Icons.Expand
                 className="collapse-icon"
                 iconColor={theme.colors.primary.base}
                 iconSize="l"
               />
-            </Tooltip>
-          </span>
-          <Icons.DatasetPhysical
-            css={{ marginTop: theme.gridUnit * 2 }}
-            iconSize="l"
-            iconColor={theme.colors.grayscale.base}
+            </span>
+          </div>
+          <DataSourcePanel
+            datasource={props.datasource}
+            controls={props.controls}
+            actions={props.actions}
           />
+        </Resizable>
+        {isCollapsed ? (
+          <div
+            className="sidebar"
+            onClick={toggleCollapse}
+            data-test="open-datasource-tab"
+            role="button"
+            tabIndex={0}
+          >
+            <span role="button" tabIndex={0} className="action-button">
+              <Tooltip title={t('Open Datasource tab')}>
+                <Icons.Collapse
+                  className="collapse-icon"
+                  iconColor={theme.colors.primary.base}
+                  iconSize="l"
+                />
+              </Tooltip>
+            </span>
+            <Icons.DatasetPhysical
+              css={{ marginTop: theme.gridUnit * 2 }}
+              iconSize="l"
+              iconColor={theme.colors.grayscale.base}
+            />
+          </div>
+        ) : null}
+        <Resizable
+          onResizeStop={(evt, direction, ref, d) =>
+            setSidebarWidths(storageKeys.controlsWidth, d)
+          }
+          defaultSize={{
+            width: getSidebarWidths(storageKeys.controlsWidth),
+            height: '100%',
+          }}
+          minWidth={defaultSidebarsWidth[storageKeys.controlsWidth]}
+          maxWidth="33%"
+          enable={{ right: true }}
+          className="col-sm-3 explore-column controls-column"
+        >
+          <QueryAndSaveBtns
+            canAdd={!!(props.can_add || props.can_overwrite)}
+            onQuery={onQuery}
+            onSave={toggleModal}
+            onStop={onStop}
+            loading={props.chart.chartStatus === 'loading'}
+            chartIsStale={chartIsStale}
+            errorMessage={renderErrorMessage()}
+            datasourceType={props.datasource_type}
+          />
+          <ConnectedControlPanelsContainer
+            actions={props.actions}
+            form_data={props.form_data}
+            controls={props.controls}
+            datasource_type={props.datasource_type}
+            isDatasourceMetaLoading={props.isDatasourceMetaLoading}
+          />
+        </Resizable>
+        <div
+          className={cx(
+            'main-explore-content',
+            isCollapsed ? 'col-sm-9' : 'col-sm-7',
+          )}
+        >
+          {renderChartContainer()}
         </div>
-      ) : null}
-      <Resizable
-        onResizeStop={(evt, direction, ref, d) =>
-          setSidebarWidths(storageKeys.controlsWidth, d)
-        }
-        defaultSize={{
-          width: getSidebarWidths(storageKeys.controlsWidth),
-          height: '100%',
-        }}
-        minWidth={defaultSidebarsWidth[storageKeys.controlsWidth]}
-        maxWidth="33%"
-        enable={{ right: true }}
-        className="col-sm-3 explore-column controls-column"
-      >
-        <QueryAndSaveBtns
-          canAdd={!!(props.can_add || props.can_overwrite)}
-          onQuery={onQuery}
-          onSave={toggleModal}
-          onStop={onStop}
-          loading={props.chart.chartStatus === 'loading'}
-          chartIsStale={chartIsStale}
-          errorMessage={renderErrorMessage()}
-          datasourceType={props.datasource_type}
-        />
-        <ConnectedControlPanelsContainer
-          actions={props.actions}
-          form_data={props.form_data}
-          controls={props.controls}
-          datasource_type={props.datasource_type}
-          isDatasourceMetaLoading={props.isDatasourceMetaLoading}
-        />
-      </Resizable>
-      <div
-        className={cx(
-          'main-explore-content',
-          isCollapsed ? 'col-sm-9' : 'col-sm-7',
-        )}
-      >
-        {renderChartContainer()}
-      </div>
-    </Styles>
+      </Styles>
+    </HasFirstError.Provider>
   );
 }
 

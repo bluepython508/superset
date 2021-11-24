@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useState } from 'react';
 import {
   ControlType,
   ControlComponentProps as BaseControlComponentProps,
@@ -27,6 +27,7 @@ import { ExploreActions } from 'src/explore/actions/exploreActions';
 import controlMap from './controls';
 
 import './Control.less';
+import HasFirstError from './HasFirstErrorContext';
 
 export type ControlProps = {
   // the actual action dispatcher (via bindActionCreators) has identical
@@ -65,7 +66,9 @@ export default function Control(props: ControlProps) {
     (value: any, errors: any[]) => setControlValue(name, value, errors),
     [name, setControlValue],
   );
-
+  const hasFirstError = useContext(HasFirstError);
+  const localHasFirstError =
+    hasFirstError && (props.validationErrors ?? []).length > 0;
   if (!type) return null;
 
   const ControlComponent = typeof type === 'string' ? controlMap[type] : type;
@@ -84,7 +87,9 @@ export default function Control(props: ControlProps) {
       onMouseLeave={() => setHovered(false)}
     >
       <ErrorBoundary>
-        <ControlComponent onChange={onChange} hovered={hovered} {...props} />
+        <HasFirstError.Provider value={localHasFirstError}>
+          <ControlComponent onChange={onChange} hovered={hovered} {...props} />
+        </HasFirstError.Provider>
       </ErrorBoundary>
     </div>
   );
